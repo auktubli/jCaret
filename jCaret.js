@@ -23,8 +23,8 @@ class jCaret {
             throw new Error('Container not found');
         }
         // 1. Configuration and Defaults
-        this.width = options.width || '1024px';
-        this.height = options.height || '300px';
+        this.width = options.width || '800px';
+        this.height = options.height || '400px';
         this.heightMode = options.heightMode || 'fixed';
         this.useLocalStorage = options.useLocalStorage || false;
         this.language = options.language || 'en'; // Default to 'en' if not specified
@@ -177,6 +177,29 @@ class jCaret {
         this.imageUpload.accept = 'image/*';
         this.imageUpload.style.display = 'none';
         this.toolbar.appendChild(this.imageUpload);
+        // Emoji Container
+        this.emojiContainer = document.createElement('div');
+        this.emojiContainer.className = 'relative';
+        this.toolbar.appendChild(this.emojiContainer);
+        this.emojiButton = document.createElement('button');
+        this.emojiButton.id = 'emojiButton';
+        this.emojiButton.title = this.i18n.insertEmoji;
+        this.emojiButton.className = 'p-2 rounded-md hover:bg-gray-200';
+        this.emojiButton.innerHTML = '<svg class="w-5 h-5 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" /></svg>';
+        this.emojiContainer.appendChild(this.emojiButton);
+        this.emojiMenu = document.createElement('div');
+        this.emojiMenu.id = 'emojiMenu';
+        this.emojiMenu.style.minWidth = "190px";
+        this.emojiMenu.className = 'hidden absolute top-full right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 grid grid-cols-5 p-2 gap-2';
+        this.emojiContainer.appendChild(this.emojiMenu);
+        const emojis = ['😀', '😁', '😂', '🤣', '😃', '😄', '😅', '😆', '😉', '😊', '😋', '😎', '😍', '😘', '🥰', '😗', '😙', '😚', '🙂', '🤗'];
+        emojis.forEach(emoji => {
+            const btn = document.createElement('button');
+            btn.className = 'text-2xl';
+            btn.textContent = emoji;
+            btn.dataset.emoji = emoji;
+            this.emojiMenu.appendChild(btn);
+        });
         // Insert Table
         this.insertTableBtn = this.createButton({ command: 'insertTable', title: this.i18n.insertTable, innerHTML: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>' });
         this.toolbar.appendChild(this.insertTableBtn);
@@ -278,7 +301,7 @@ class jCaret {
             this.fontNameButton.firstChild.textContent = opt.label;
             this.fontNameValue = opt.value;
         }
-       // Ensure default font is selected if query returns empty on initial load
+        // Ensure default font is selected if query returns empty on initial load
         if (!this.fontNameValue) {
             const defaultOpt = this.fontOptions.find(f => f.value === defaultFont);
             if (defaultOpt) {
@@ -399,7 +422,8 @@ class jCaret {
                 warning: 'تحذير',
                 ok: 'موافق',
                 storageWarning: 'حجم محتوى المحرر كبير جدًا، لذا لن يتم حفظ بعضه عند إعادة تحميل الصفحة في التخزين المحلي، خاصة الصور المرفوعة.',
-                selectWarning: 'النص المحدد متعدد!.'
+                selectWarning: 'النص المحدد متعدد!.',
+                insertEmoji: 'إدراج إيموجي'
             },
             en: {
                 undo: 'Undo', redo: 'Redo', fontFamily: 'Font Family',
@@ -433,25 +457,26 @@ class jCaret {
                 warning: 'Warning',
                 ok: 'OK',
                 storageWarning: 'The content of the editor is too big, so some of it won\'t be saved on page reload in local storage, especially uploaded images.',
-                selectWarning: 'Multi Selected!.'
+                selectWarning: 'Multi Selected!.',
+                insertEmoji: 'Insert Emoji'
             }
         };
         this.i18n = translations[this.language] || translations.en;
     }
- 
+
     /**
-     * @method createDivider
-     * @description Creates a vertical separator for the toolbar.
-     */
+        * @method createDivider
+        * @description Creates a vertical separator for the toolbar.
+        */
     createDivider() {
         const div = document.createElement('div');
         div.className = 'h-6 w-px bg-gray-300 mx-1';
         return div;
     }
     /**
-     * @method createButton
-     * @description Creates a standard toolbar button.
-     */
+        * @method createButton
+        * @description Creates a standard toolbar button.
+        */
     createButton(attrs = {}) {
         const button = document.createElement('button');
         button.className = 'p-2 rounded-md hover:bg-gray-200';
@@ -461,10 +486,10 @@ class jCaret {
         return button;
     }
     /**
-     * @method createFontNameSelect
-     * @description Creates the Font Family selection dropdown as a custom component for scrollability.
-     * Uses translated font names for display text.
-     */
+        * @method createFontNameSelect
+        * @description Creates the Font Family selection dropdown as a custom component for scrollability.
+        * Uses translated font names for display text.
+        */
     createFontNameSelect() {
         const container = document.createElement('div');
         container.className = 'relative';
@@ -546,16 +571,16 @@ class jCaret {
         return container;
     }
     /**
-     * @method createFontSizeSelect
-     * @description Creates the Font Size selection dropdown.
-     */
+        * @method createFontSizeSelect
+        * @description Creates the Font Size selection dropdown.
+        */
     createFontSizeSelect() {
         const select = document.createElement('select');
         select.id = 'fontSize';
         select.style.height = "2.5rem";
         select.className = 'p-2 border border-gray-300 rounded-md text-sm';
         //select.style.fontFamily = "sans-serif";
-     
+    
         select.dir = this.dir;
         select.innerHTML = `
             <option value="">${this.i18n.fontSize}</option>
@@ -570,9 +595,9 @@ class jCaret {
         return select;
     }
     /**
-     * @method createLinkModal
-     * @description Creates the modal dialog for inserting links.
-     */
+        * @method createLinkModal
+        * @description Creates the modal dialog for inserting links.
+        */
     createLinkModal() {
         const div = document.createElement('div');
         div.id = 'linkModal';
@@ -590,9 +615,9 @@ class jCaret {
         return div;
     }
     /**
-     * @method createTableModal
-     * @description Creates the modal dialog for inserting tables.
-     */
+        * @method createTableModal
+        * @description Creates the modal dialog for inserting tables.
+        */
     createTableModal() {
         const div = document.createElement('div');
         div.id = 'tableModal';
@@ -613,9 +638,9 @@ class jCaret {
         return div;
     }
     /**
-     * @method createStorageModal
-     * @description Creates the modal dialog for storage warning.
-     */
+        * @method createStorageModal
+        * @description Creates the modal dialog for storage warning.
+        */
     createStorageModal() {
         const div = document.createElement('div');
         div.id = 'storageModal';
@@ -632,17 +657,17 @@ class jCaret {
         return div;
     }
     /**
-     * @method createAboutModal
-     * @description Creates the modal dialog for about info.
-     */
+        * @method createAboutModal
+        * @description Creates the modal dialog for about info.
+        */
     createInfoModal() {
         const div = document.createElement('div');
         div.id = 'infoModal';
         div.className = 'hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50';
         div.innerHTML = `
-         
+        
             <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md" dir="${this.dir}">
-             
+            
                 <div class="flex items-center gap-3">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <h3 class="text-lg font-medium ">${this.i18n.infoTitle}</h3>
@@ -651,7 +676,7 @@ class jCaret {
                     <h3 class="text-lg font-medium text-gray-800">${this.i18n.infoText}</h3>
                 </div>
                 <div id="aboutContent" class="space-y-3 text-sm">
-                 
+                
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">${this.i18n.forQuote}</span>
                         <div class="flex items-center gap-1" dir="ltr">
@@ -689,9 +714,9 @@ class jCaret {
         return div;
     }
     /**
-     * @method createMultiSizeModal
-     * @description Creates the modal dialog for multi size selected text warning.
-     */
+        * @method createMultiSizeModal
+        * @description Creates the modal dialog for multi size selected text warning.
+        */
     createSelectModal() {
         const div = document.createElement('div');
         div.id = 'selectModal';
@@ -707,63 +732,53 @@ class jCaret {
         `;
         return div;
     }
-     /**
-     * @method getCurrentBlockElement
-     * @description Returns current element where caret is.
-     */
+        /**
+        * @method getCurrentBlockElement
+        * @description Returns current element where caret is.
+        */
     getCurrentBlockElement() {
             const selection = window.getSelection();
             
             // 1. Safety check: Is anything selected?
             if (!selection.rangeCount) return null;
-
             // 2. Get the node where the selection starts
             let node = selection.anchorNode;
-
-            // 3. Text Node Fix: 
+            // 3. Text Node Fix:
             // If the node is text (nodeType 3), get its parent element.
             // Example: <p>Hello|</p> -> node is "Hello", parent is <p>
             if (node.nodeType === 3) {
                 node = node.parentNode;
             }
-
             // 4. Check for the "Root" (Nothing) case
-            // If the resulting node is the contenteditable div itself, 
+            // If the resulting node is the contenteditable div itself,
             // it means the text is not wrapped in a p or div.
             if (node.getAttribute('contenteditable') === 'true') {
-                return 'ROOT'; 
+                return 'ROOT';
             }
-
             // 5. Return the Tag Name (e.g., 'P', 'DIV', 'LI')
             return node.tagName;
         }
     /**
-     * @method getNextBlockElement
-     * @description Returns next line element where caret is.
-     */
+        * @method getNextBlockElement
+        * @description Returns next line element where caret is.
+        */
     getNextBlockElement() {
         const selection = window.getSelection();
         if (!selection.rangeCount) return null;
-
         // 1. Get the node where the caret is
         let currentNode = selection.anchorNode;
-
         // 2. Define your editor container (update ID as needed)
-        const editor = document.getElementById('editor'); 
-
+        const editor = document.getElementById('editor');
         // Safety check: Ensure selection is actually inside the editor
         if (!editor.contains(currentNode)) return null;
-
         // 3. Traverse UP to find the immediate child of the editor
         // We want the top-level block (the P or DIV), not the <b> or <i> inside it.
         while (currentNode && currentNode.parentNode !== editor) {
             currentNode = currentNode.parentNode;
         }
-
-        // 4. Now currentNode is the block (e.g., <p> or <div>). 
+        // 4. Now currentNode is the block (e.g., <p> or <div>).
         // Get the next sibling element.
         const nextElement = currentNode.nextElementSibling;
-
         if (nextElement) {
             return nextElement.tagName; // Returns 'DIV', 'P', 'UL', etc.
         } else {
@@ -771,13 +786,17 @@ class jCaret {
         }
     }
     /**
-     * @method addEventListeners
-     * @description Initializes all event listeners for the toolbar, editor, and modals.
-     */
+        * @method addEventListeners
+        * @description Initializes all event listeners for the toolbar, editor, and modals.
+        */
     addEventListeners() {
         this.alignmentButton.addEventListener('click', e => {
             e.preventDefault();
             this.alignmentMenu.classList.toggle('hidden');
+        });
+        this.emojiButton.addEventListener('click', e => {
+            e.preventDefault();
+            this.emojiMenu.classList.toggle('hidden');
         });
         document.addEventListener('click', e => {
             if (!this.alignmentButton.contains(e.target) && !this.alignmentMenu.contains(e.target)) {
@@ -788,6 +807,9 @@ class jCaret {
             }
             if (!this.tableOperationsButton.contains(e.target) && !this.tableMenu.contains(e.target)) {
                 this.tableMenu.classList.add('hidden');
+            }
+            if (!this.emojiButton.contains(e.target) && !this.emojiMenu.contains(e.target)) {
+                this.emojiMenu.classList.add('hidden');
             }
         });
         this.highlightButton.addEventListener('click', e => {
@@ -808,6 +830,14 @@ class jCaret {
                 this.editor.focus();
                 this.restoreSelection();
                 document.execCommand('backColor', false, this.currentHighlightColor);
+            }
+        });
+        this.emojiMenu.addEventListener('click', e => {
+            const btn = e.target.closest('button[data-emoji]');
+            if (btn) {
+                this.emojiMenu.classList.add('hidden');
+                this.editor.focus();
+                document.execCommand('insertText', false, btn.dataset.emoji);
             }
         });
         this.tableOperationsButton.addEventListener('click', e => {
@@ -1060,6 +1090,9 @@ class jCaret {
                     currentDir = 'ltr';
                     } else if (effectiveAlign === 'right') {
                     currentDir = 'rtl';
+                    }
+                    if(this.language === "en"){
+                        currentDir = "ltr";
                     }
                 }
                 }
@@ -1337,20 +1370,18 @@ class jCaret {
                     let node = selection.anchorNode;
                     
                     // Handle text nodes
-                    if (node.nodeType === 3) node = node.parentNode; 
+                    if (node.nodeType === 3) node = node.parentNode;
                     
                     // 2. NOW we look for the P (because the list is gone now)
                     const pElement = node.closest('p');
                     
                     if (pElement) {
                         // ... (Your existing unwrapping and normalization logic)
-
                         const spans = pElement.querySelectorAll('span');
                         spans.forEach(span => {
                             span.replaceWith(...span.childNodes);
                         });
                         pElement.normalize(); // 5. Merge text nodes
-
                         // --- 6. NEW CODE TO PUSH CARET TO END ---
                         const range = document.createRange();
                         
@@ -1358,14 +1389,13 @@ class jCaret {
                         // pElement.childNodes.length ensures the offset is after the last child.
                         range.setStart(pElement, pElement.childNodes.length);
                         range.collapse(true); // Collapse range to a single point (the caret)
-
                         // Apply the new range to the selection
                         selection.removeAllRanges();
                         selection.addRange(range);
                         // ----------------------------------------
                     }
-                }, 0); 
-            }  
+                }, 0);
+            }
         });
         oListBtn.addEventListener("click", function() {
             // Check if the button is CURRENTLY active (meaning we are about to turn the list OFF)
@@ -1376,20 +1406,18 @@ class jCaret {
                     let node = selection.anchorNode;
                     
                     // Handle text nodes
-                    if (node.nodeType === 3) node = node.parentNode; 
+                    if (node.nodeType === 3) node = node.parentNode;
                     
                     // 2. NOW we look for the P (because the list is gone now)
                     const pElement = node.closest('p');
                     
                     if (pElement) {
                         // ... (Your existing unwrapping and normalization logic)
-
                         const spans = pElement.querySelectorAll('span');
                         spans.forEach(span => {
                             span.replaceWith(...span.childNodes);
                         });
                         pElement.normalize(); // 5. Merge text nodes
-
                         // --- 6. NEW CODE TO PUSH CARET TO END ---
                         const range = document.createRange();
                         
@@ -1397,14 +1425,13 @@ class jCaret {
                         // pElement.childNodes.length ensures the offset is after the last child.
                         range.setStart(pElement, pElement.childNodes.length);
                         range.collapse(true); // Collapse range to a single point (the caret)
-
                         // Apply the new range to the selection
                         selection.removeAllRanges();
                         selection.addRange(range);
                         // ----------------------------------------
                     }
-                }, 0); 
-            }  
+                }, 0);
+            }
         });
         this.tableModal.querySelector('#cancelTable').addEventListener('click', () => {
             this.tableModal.classList.add('hidden');
@@ -1435,7 +1462,7 @@ class jCaret {
             isFormatting = true;
             try {
                 if (this.editor.textContent.trim() === '') {
-                    setTimeout(() => {  // Queue asynchronously to avoid recursion
+                    setTimeout(() => { // Queue asynchronously to avoid recursion
                         document.execCommand('foreColor', false, '#000000');
                         document.getElementById("fontColorInput").value = "#000000";
                         document.querySelector('#foreColorBar').style.backgroundColor = "#000000";
@@ -1490,17 +1517,17 @@ class jCaret {
         });
     }
     /**
-     * @method saveSelection
-     * @description Saves the current text selection range.
-     */
+        * @method saveSelection
+        * @description Saves the current text selection range.
+        */
     saveSelection() {
         const sel = window.getSelection();
         if (sel.rangeCount) this.savedRange = sel.getRangeAt(0).cloneRange();
     }
     /**
-     * @method restoreSelection
-     * @description Restores the saved text selection range.
-     */
+        * @method restoreSelection
+        * @description Restores the saved text selection range.
+        */
     restoreSelection() {
         if (this.savedRange) {
             const sel = window.getSelection();
@@ -1509,9 +1536,9 @@ class jCaret {
         }
     }
     /**
-     * @method debounce
-     * @description Creates a debounced function to limit event frequency.
-     */
+        * @method debounce
+        * @description Creates a debounced function to limit event frequency.
+        */
     debounce(func, delay) {
         let timeout;
         return (...args) => {
@@ -1520,9 +1547,9 @@ class jCaret {
         };
     }
     /**
-     * @property debouncedPush
-     * @description Debounced function for pushing content to the undo stack.
-     */
+        * @property debouncedPush
+        * @description Debounced function for pushing content to the undo stack.
+        */
     debouncedPush = this.debounce(() => {
         if (this.editor.innerHTML !== this.lastContent) {
             this.undoStack.push(this.lastContent);
@@ -1548,9 +1575,9 @@ class jCaret {
                 }
             }
     /**
-     * @method resetEditorStyles
-     * @description Resets text formatting in the editor.
-     */
+        * @method resetEditorStyles
+        * @description Resets text formatting in the editor.
+        */
     resetEditorStyles() {
         this.editor.blur();
         this.editor.focus();
@@ -1558,7 +1585,7 @@ class jCaret {
         document.getElementById("fontColorInput").value = "#000000";
         document.querySelector('#foreColorBar').style.backgroundColor = "#000000";
         document.execCommand('backColor', false, '#ffffff');
-        document.querySelector('#highlightBar').style.backgroundColor = "#ffffff";
+        document.querySelector('#highlightBar').style.backgroundColor = '#ffffff';
         const defaultFont = this.language === 'ar' ? 'Amiri' : 'Inter';
         document.execCommand('fontName', false, defaultFont);
         document.execCommand('fontSize', false, '3');
@@ -1567,11 +1594,11 @@ class jCaret {
         sel.removeAllRanges();
     }
     /**
-     * @method applyInlineStyle
-     * @description Applies an inline style to the selected text or insertion point.
-     * @param {string} property The CSS property to apply (e.g., 'font-size').
-     * @param {string} value The value for the CSS property (e.g., '48px').
-     */
+        * @method applyInlineStyle
+        * @description Applies an inline style to the selected text or insertion point.
+        * @param {string} property The CSS property to apply (e.g., 'font-size').
+        * @param {string} value The value for the CSS property (e.g., '48px').
+        */
     applyInlineStyle(property, value) {
                 const sel = window.getSelection();
                 if (sel.rangeCount) {
@@ -1600,7 +1627,7 @@ class jCaret {
                         } else if (anchor.tagName === 'SPAN' && prev?.tagName === 'FONT') {
                             if(prev?.getElementsByTagName('span').length > 0){
                                 this.selectModal.classList.remove('hidden');
-                            } else{ 
+                            } else{
                                 this.selectModal.classList.remove('hidden');
                             }
                         } else {
@@ -1633,16 +1660,14 @@ class jCaret {
                         sel.removeAllRanges();
                         sel.addRange(newRange);
                         span.removeChild(span.firstChild); // Remove zero-width space after positioning
-             
+            
                     }
                 }
             }
     removeCurrentBlankLine() {
 const selection = window.getSelection();
 if (!selection.rangeCount) return;
-
 let currentNode = selection.anchorNode;
-
 // 1. Traverse up to find the Block Element (P, DIV, LI)
 // We stop if we hit the editor root so we don't delete the editor itself
 const editor = document.getElementById('editor'); // Adjust ID as needed
@@ -1654,18 +1679,15 @@ currentNode = currentNode.parentNode;
 
 // Ensure we are inside a block-level element
 const block = currentNode.closest('p, div, li');
-
 if (!block || !editor.contains(block) || block === editor) {
 console.log("No deletable block found.");
 return;
 }
-
 // 2. Check if it is "Empty"
-// Browsers often put a single <br> in empty paragraphs. 
+// Browsers often put a single <br> in empty paragraphs.
 // We check if text is empty AND if it doesn't contain other elements (like images)
 const hasText = block.textContent.trim().length > 0;
 const hasImages = block.querySelector('img') !== null;
-
 if (!hasText && !hasImages) {
 
 // 3. Find where to put the cursor (Previous Element)
@@ -1674,21 +1696,20 @@ const prevBlock = block.previousElementSibling;
 if (prevBlock) {
     // A. Remove the current block
     block.remove();
-
     // B. Move cursor to the end of the previous block
     setCaretToEnd(prevBlock);
 } else {
-    // Edge Case: It's the first line. 
+    // Edge Case: It's the first line.
     // Usually, we don't delete the first line, or we just empty it.
     // Here, we ensure it's just a clean empty line.
-    block.innerHTML = '<br>'; 
+    block.innerHTML = '<br>';
 }
 }
 }
     /**
-     * @method mergeNestedSpans
-     * @description Merges nested spans to prevent deep nesting from repeated style applications.
-     */
+        * @method mergeNestedSpans
+        * @description Merges nested spans to prevent deep nesting from repeated style applications.
+        */
     mergeNestedSpans() {
         let merged;
         do {
@@ -1712,183 +1733,192 @@ if (prevBlock) {
             }
         } while (merged);
     }
-    
     /**
-     * @method onKeyDown
-     * @description Handles custom keyboard shortcuts and behaviors.
-     */
-            onKeyDown(e) {
-                // NEW: Font size increase (Ctrl +)
-                if (e.ctrlKey && (e.key === '+' || e.key === '=')) {
-                    e.preventDefault();
-                    this.saveSelection();
-                    this.restoreSelection(); // Ensure selection is active
-                    const oldContent = this.editor.innerHTML;
-                    const sel = window.getSelection();
-                    if (!sel.rangeCount) return;
-                   
-                    let el = sel.getRangeAt(0).startContainer;
-                    if (el.nodeType === Node.TEXT_NODE) el = el.parentElement;
-                    // Ensure the element is inside the editor
-                    if (!this.editor.contains(el)) el = this.editor;
-                    const style = window.getComputedStyle(el, null).getPropertyValue('font-size');
-                    const currentPx = parseFloat(style);
-                    const newPx = currentPx + 2; // Increment by 2px
-                    this.applyInlineStyle('font-size', `${newPx}px`);
-            this.mergeNestedSpans();
-                    this.pushUndoState(oldContent); // Use helper to save undo state
-                    return; // Stop further execution
-                }
-                // NEW: Font size decrease (Ctrl -)
-                if (e.ctrlKey && e.key === '-') {
-                    e.preventDefault();
-                    this.saveSelection();
-                    this.restoreSelection();
-                    const oldContent = this.editor.innerHTML;
-                    const sel = window.getSelection();
-                    if (!sel.rangeCount) return;
-                    let el = sel.getRangeAt(0).startContainer;
-                    if (el.nodeType === Node.TEXT_NODE) el = el.parentElement;
-                   
-                    // Ensure the element is inside the editor
-                    if (!this.editor.contains(el)) el = this.editor;
-                    const style = window.getComputedStyle(el, null).getPropertyValue('font-size');
-                    const currentPx = parseFloat(style);
-                    const minPx = 10; // Minimum pixel size (approx. HTML size 1)
-                    let newPx = currentPx - 2; // Decrement by 2px
-                    if (newPx < minPx) newPx = minPx;
-                    this.applyInlineStyle('font-size', `${newPx}px`);
-            this.mergeNestedSpans();
-                   
-                    this.pushUndoState(oldContent); // Use helper to save undo state
-                    return; // Stop further execution
-                }
-        
-                if (e.key === 'Enter' || e.key === ' ') {
-                    try {
-                        const currentValue = document.queryCommandValue('backColor').toLowerCase();
-                        const isHighlightActive = !(currentValue === 'rgb(0, 0, 0)' || currentValue === 'rgb(255, 255, 255)' || currentValue === '#000000' || currentValue === '#ffffff' || currentValue === 'transparent' || currentValue === '');
-                        if (isHighlightActive) {
-                            if (e.key === 'Enter'){
-                                document.querySelector('#highlightBar').style.backgroundColor = '#ffffff';
-                                //document.execCommand('insertHTML', false, "<p></p>");
-                            }
-                            document.execCommand('backColor', false, '#ffffff');
-                            document.querySelector('#highlightBar').style.backgroundColor = '#ffffff';
-                        }else{
-                            document.querySelector('#highlightBar').style.backgroundColor = "#ffffff";
-                            document.execCommand('backColor', false, '#ffffff');
-                        }
-                    } catch (error) {
-                        console.error('Error applying backColor fix on keydown:', error);
-                    }
-                }
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    const sel = window.getSelection();
-                    if (!sel.rangeCount) return;
-                    const range = sel.getRangeAt(0);
-                    let container = range.startContainer;
-                    if (container.nodeType !== Node.ELEMENT_NODE) container = container.parentElement;
-                    const blockquote = container.closest('blockquote');
-                    if (blockquote) {
-                        const newP = document.createElement('p');
-                        newP.innerHTML = '<br>';
-                        blockquote.after(newP);
-                        const newRange = document.createRange();
-                        newRange.setStart(newP, 0);
-                        newRange.collapse(true);
-                        sel.removeAllRanges();
-                        sel.addRange(newRange);
-                  } else {
-                        document.execCommand('insertParagraph', false, null);
-                    }
-                    let block = sel.getRangeAt(0).startContainer;
-                    while (block && block.nodeType !== Node.ELEMENT_NODE) block = block.parentNode;
-                    block = block.closest('p, blockquote');
-                    if (block) {
-                        const spans = block.querySelectorAll('span[style*="background-color"]');
-                        spans.forEach(span => {
-                            if (span.innerHTML === '<br>' || span.textContent.trim() === '') {
-                                const frag = document.createDocumentFragment();
-                                while (span.firstChild) frag.appendChild(span.firstChild);
-                                span.parentNode.replaceChild(frag, span);
-                            }
-                        });
-                    }
-                    setTimeout(() => {
-                        let cursorRect;
-                        if (sel.rangeCount > 0) {
-                            const currentRange = sel.getRangeAt(0);
-                            if (currentRange.collapsed) {
-                                const tempSpan = document.createElement('span');
-                              tempSpan.innerHTML = '&#8203;';
-                                currentRange.insertNode(tempSpan);
-                                cursorRect = tempSpan.getBoundingClientRect();
-                                tempSpan.parentNode.removeChild(tempSpan);
-                            } else {
-                            cursorRect = currentRange.getBoundingClientRect();
-                            }
-                            const editorRect = this.editor.getBoundingClientRect();
-                            let scrollDelta = 0;
-                            if (cursorRect.bottom > editorRect.bottom) {
-                                scrollDelta = cursorRect.bottom - editorRect.bottom + 20;
-                            } else if (cursorRect.top < editorRect.top) {
-                                scrollDelta = cursorRect.top - editorRect.top - 20;
-                            }
-                            if (scrollDelta !== 0) {
-                                this.editor.scrollTop += scrollDelta;
-                            }
-                        }
-                    }, 0);
-                    this.updateToolbarState();
-                    return;
-                }
-                if (e.key === 'Delete') {
+        * @method isRTLL
+        * @description Checks if inserted Character is in RTL Direction or not.
+        */
+    isRTLL(c){           
+        const rtlRanges = /[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF\u07C0-\u07FF\uFB1D-\uFDFF\uFE70-\uFEFC]/;
+        return rtlRanges.test(c) && c.length === 1;
+    };
+    /**
+    * @method onKeyDown
+    * @description Handles custom keyboard shortcuts and behaviors.
+    */
+    onKeyDown(e) { 
+        if (this.isRTLL(e.key) && this.language === 'en') {
+            e.preventDefault();  // blocks the RTL character
+        }
+        // NEW: Font size increase (Ctrl +)
+        if (e.ctrlKey && (e.key === '+' || e.key === '=')) {
+            e.preventDefault();
+            this.saveSelection();
+            this.restoreSelection(); // Ensure selection is active
             const oldContent = this.editor.innerHTML;
-                    const sel = window.getSelection();
-                    if (!sel.rangeCount) return;
-                    const range = sel.getRangeAt(0);
-                    if (range.collapsed) {
-                        let node = range.startContainer;
-                        if (node.nodeType !== Node.ELEMENT_NODE) node = node.parentElement;
-                        const td = node.closest('td');
-                        if (td && (td.innerHTML === '<br>' || td.textContent.trim() === '')) {
-                            e.preventDefault();
-                            const resizable = td.closest('.resizable');
-                            if (resizable) {
-                                resizable.remove();
-                                this.selectedResizable = null;
-                                this.updateToolbarState();
-                                return;
-                            }
-                        }
-                    }
-                    if (this.selectedResizable) {
-                      e.preventDefault();
-                        this.selectedResizable.remove();
-                        this.selectedResizable = null;
-                        this.updateToolbarState();
-                    }
-            if (this.editor.innerHTML !== oldContent) {
-                this.undoStack.push(oldContent);
-                this.redoStack = [];
-                this.lastContent = this.editor.innerHTML;
-                this.saveAll();
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+           
+            let el = sel.getRangeAt(0).startContainer;
+            if (el.nodeType === Node.TEXT_NODE) el = el.parentElement;
+            // Ensure the element is inside the editor
+            if (!this.editor.contains(el)) el = this.editor;
+            const style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+          const currentPx = parseFloat(style);
+            const newPx = currentPx + 2; // Increment by 2px
+            this.applyInlineStyle('font-size', `${newPx}px`);
+    this.mergeNestedSpans();
+            this.pushUndoState(oldContent); // Use helper to save undo state
+            return; // Stop further execution
+        }
+        // NEW: Font size decrease (Ctrl -)
+        if (e.ctrlKey && e.key === '-') {
+            e.preventDefault();
+            this.saveSelection();
+            this.restoreSelection();
+            const oldContent = this.editor.innerHTML;
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+          let el = sel.getRangeAt(0).startContainer;
+            if (el.nodeType === Node.TEXT_NODE) el = el.parentElement;
+           
+            // Ensure the element is inside the editor
+            if (!this.editor.contains(el)) el = this.editor;
+            const style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+            const currentPx = parseFloat(style);
+            const minPx = 10; // Minimum pixel size (approx. HTML size 1)
+            let newPx = currentPx - 2; // Decrement by 2px
+            if (newPx < minPx) newPx = minPx;
+            this.applyInlineStyle('font-size', `${newPx}px`);
+            this.mergeNestedSpans();
+            this.pushUndoState(oldContent); // Use helper to save undo state
+            return; // Stop further execution
+        }
+
+        if (e.key === 'Enter' || e.key === ' ') {
+            try {
+                const currentValue = document.queryCommandValue('backColor').toLowerCase();
+                const isHighlightActive = !(currentValue === 'rgb(0, 0, 0)' || currentValue === 'rgb(255, 255, 255)' || currentValue === '#000000' || currentValue === '#ffffff' || currentValue === 'transparent' || currentValue === '');
+                if (isHighlightActive) {
+                    if (e.key === 'Enter'){
+                        document.querySelector('#highlightBar').style.backgroundColor = '#ffffff';
+                        //document.execCommand('insertHTML', false, "<p></p>");
+                    }
+                    document.execCommand('backColor', false, '#ffffff');
+                    document.querySelector('#highlightBar').style.backgroundColor = '#ffffff';
+                }else{
+                    document.querySelector('#highlightBar').style.backgroundColor = "#ffffff";
+                    document.execCommand('backColor', false, '#ffffff');
+                }
+            } catch (error) {
+                console.error('Error applying backColor fix on keydown:', error);
             }
-                }
-            }
+        }
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            const range = sel.getRangeAt(0);
+            let container = range.startContainer;
+            if (container.nodeType !== Node.ELEMENT_NODE) container = container.parentElement;
+            const blockquote = container.closest('blockquote');
+            if (blockquote) {
+                const newP = document.createElement('p');
+                newP.innerHTML = '<br>';
+               blockquote.after(newP);
+                const newRange = document.createRange();
+                newRange.setStart(newP, 0);
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+          } else {
+                document.execCommand('insertParagraph', false, null);
+            }
+            let block = sel.getRangeAt(0).startContainer;
+            while (block && block.nodeType !== Node.ELEMENT_NODE) block = block.parentNode;
+            block = block.closest('p, blockquote');
+            if (block) {
+                const spans = block.querySelectorAll('span[style*="background-color"]');
+                spans.forEach(span => {
+                    if (span.innerHTML === '<br>' || span.textContent.trim() === '') {
+                        const frag = document.createDocumentFragment();
+                        while (span.firstChild) frag.appendChild(span.firstChild);
+                        span.parentNode.replaceChild(frag, span);
+                    }
+                });
+            }
+            setTimeout(() => {
+                let cursorRect;
+                if (sel.rangeCount > 0) {
+                    const currentRange = sel.getRangeAt(0);
+                    if (currentRange.collapsed) {
+                        const tempSpan = document.createElement('span');
+                    tempSpan.innerHTML = '&#8203;';
+                        currentRange.insertNode(tempSpan);
+                        cursorRect = tempSpan.getBoundingClientRect();
+                        tempSpan.parentNode.removeChild(tempSpan);
+                    } else {
+                    cursorRect = currentRange.getBoundingClientRect();
+                    }
+                    const editorRect = this.editor.getBoundingClientRect();
+                    let scrollDelta = 0;
+                    if (cursorRect.bottom > editorRect.bottom) {
+                        scrollDelta = cursorRect.bottom - editorRect.bottom + 20;
+                    } else if (cursorRect.top < editorRect.top) {
+                        scrollDelta = cursorRect.top - editorRect.top - 20;
+                    }
+                    if (scrollDelta !== 0) {
+                        this.editor.scrollTop += scrollDelta;
+                    }
+                }
+            }, 0);
+            this.updateToolbarState();
+            return;
+        }
+        if (e.key === 'Delete') {
+            const oldContent = this.editor.innerHTML;
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            const range = sel.getRangeAt(0);
+            if (range.collapsed) {
+                let node = range.startContainer;
+                if (node.nodeType !== Node.ELEMENT_NODE) node = node.parentElement;
+                const td = node.closest('td');
+                if (td && (td.innerHTML === '<br>' || td.textContent.trim() === '')) {
+                    e.preventDefault();
+                    const resizable = td.closest('.resizable');
+                    if (resizable) {
+                        resizable.remove();
+                        this.selectedResizable = null;
+                        this.updateToolbarState();
+                        return;
+                    }
+                }
+            }
+        if (this.selectedResizable) {
+            e.preventDefault();
+            this.selectedResizable.remove();
+            this.selectedResizable = null;
+            this.updateToolbarState();
+        }
+        if (this.editor.innerHTML !== oldContent) {
+            this.undoStack.push(oldContent);
+            this.redoStack = [];
+            this.lastContent = this.editor.innerHTML;
+            this.saveAll();
+            }
+        }
+    }
     /**
-     * @method isRTL
-     * @description Checks if a given text string contains RTL characters.
-     */
+    * @method isRTL
+    * @description Checks if a given text string contains RTL characters.
+    */
     isRTL(text) {
         return /[\u0600-\u06FF\u0750-\u077F]/.test(text);
     }
     /**
-     * @method updateDirections
-     * @description Updates the dir attribute for all block-level elements based on content.
-     */
+    * @method updateDirections
+    * @description Updates the dir attribute for all block-level elements based on content.
+    */
     updateDirections() {
         const blocks = this.editor.querySelectorAll('p, blockquote, ol, ul, li, td');
         blocks.forEach(b => {
@@ -1897,24 +1927,23 @@ if (prevBlock) {
                 b.dir = this.isRTL(t) ? 'rtl' : 'ltr';
                 if (!b.style.textAlign) {
                     b.style.textAlign = b.dir === 'rtl' ? 'right' : 'left';
-                } 
+                }
             }
-            
         });
     }
     /**
-     * @method isURL
-     * @description Checks if given text is a URL form.
-     */
+    * @method isURL
+    * @description Checks if given text is a URL form.
+    */
     isURL(url){
-         const expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
-         const regex = new RegExp(expression);
-         return url.match(regex);
+        const expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+        const regex = new RegExp(expression);
+        return url.match(regex);
     }
     /**
-     * @method updateToolbarState
-     * @description Updates the active state of all toolbar buttons based on current selection.
-     */
+    * @method updateToolbarState
+    * @description Updates the active state of all toolbar buttons based on current selection.
+    */
     updateToolbarState() {
         const commandButtons = this.toolbar.querySelectorAll('button[data-command]');
         let superActive = false, subActive = false;
@@ -2037,7 +2066,7 @@ if (prevBlock) {
                         this.highlightContainer.querySelector('#highlightBar').style.backgroundColor = hex;
                         this.currentHighlightColor = hex;
                     }else{
-           
+            
                     }
                 }
                 if (currentFore){
@@ -2049,9 +2078,9 @@ if (prevBlock) {
         } catch (_) {}
     }
     /**
-     * @method colorToHex
-     * @description Converts an RGB color string to a hex string.
-     */
+    * @method colorToHex
+    * @description Converts an RGB color string to a hex string.
+    */
     colorToHex(c) {
         c = c.toLowerCase();
         if (c.startsWith('#')) return c;
@@ -2063,9 +2092,9 @@ if (prevBlock) {
         return `#${toHex(m[1])}${toHex(m[2])}${toHex(m[3])}`;
     }
     /**
-     * @method saveAll
-     * @description Saves the editor content to localStorage if enabled, with error handling for quota exceeded.
-     */
+    * @method saveAll
+    * @description Saves the editor content to localStorage if enabled, with error handling for quota exceeded.
+    */
     saveAll() {
         if (this.useLocalStorage) {
             const content = this.editor.innerHTML;
@@ -2080,9 +2109,9 @@ if (prevBlock) {
         }
     }
     /**
-     * @method updateTableMenu
-     * @description Disables table insert buttons if max column limit is reached.
-     */
+    * @method updateTableMenu
+    * @description Disables table insert buttons if max column limit is reached.
+    */
     updateTableMenu() {
         const insertLeftBtn = this.tableMenu.querySelector('[data-command="insertColumnLeft"]');
         const insertRightBtn = this.tableMenu.querySelector('[data-command="insertColumnRight"]');
@@ -2110,9 +2139,9 @@ if (prevBlock) {
         if (insertRightBtn) insertRightBtn.disabled = disable;
     }
     /**
-     * @method addResizeHandle
-     * @description Adds the resize handle to a resizable element (image or table container).
-     */
+    * @method addResizeHandle
+    * @description Adds the resize handle to a resizable element (image or table container).
+    */
     addResizeHandle(div) {
         const handles = div.querySelectorAll('.resize-handle');
         handles.forEach(h => h.remove());
@@ -2124,18 +2153,18 @@ if (prevBlock) {
         div.appendChild(handle);
     }
     /**
-     * @method removeResizeHandles
-     * @description Removes the resize handle from a resizable element.
-     */
+    * @method removeResizeHandles
+    * @description Removes the resize handle from a resizable element.
+    */
     removeResizeHandles(div) {
         const handles = div.querySelectorAll('.resize-handle');
         handles.forEach(h => h.remove());
         div.classList.remove('selected');
     }
     /**
-     * @method onMouseDown
-     * @description Initiates the resizing process on mouse down.
-     */
+    * @method onMouseDown
+    * @description Initiates the resizing process on mouse down.
+    */
     onMouseDown(e) {
         if (e.target.classList.contains('resize-handle')) {
             e.preventDefault();
@@ -2153,9 +2182,9 @@ if (prevBlock) {
         }
     }
     /**
-     * @method onTouchStart
-     * @description Initiates the resizing process on touch start.
-     */
+    * @method onTouchStart
+    * @description Initiates the resizing process on touch start.
+    */
     onTouchStart(e) {
         if (e.target.classList.contains('resize-handle')) {
             e.preventDefault();
@@ -2173,9 +2202,9 @@ if (prevBlock) {
         }
     }
     /**
-     * @method onMouseMove
-     * @description Handles element resizing when the mouse moves.
-     */
+    * @method onMouseMove
+    * @description Handles element resizing when the mouse moves.
+    */
     onMouseMove(e) {
         if (!this.isResizing) return;
         e.preventDefault();
@@ -2193,9 +2222,9 @@ if (prevBlock) {
         }
     }
     /**
-     * @method onTouchMove
-     * @description Handles element resizing when a touch moves.
-     */
+    * @method onTouchMove
+    * @description Handles element resizing when a touch moves.
+    */
     onTouchMove(e) {
         if (!this.isResizing) return;
         e.preventDefault();
@@ -2213,9 +2242,9 @@ if (prevBlock) {
         }
     }
     /**
-     * @method onMouseUp
-     * @description Ends the resizing process on mouse up.
-     */
+    * @method onMouseUp
+    * @description Ends the resizing process on mouse up.
+    */
     onMouseUp(e) {
         if (this.isResizing) {
             this.isResizing = false;
@@ -2230,9 +2259,9 @@ if (prevBlock) {
         }
     }
     /**
-     * @method onTouchEnd
-     * @description Ends the resizing process on touch end.
-     */
+    * @method onTouchEnd
+    * @description Ends the resizing process on touch end.
+    */
     onTouchEnd(e) {
         if (this.isResizing) {
             this.isResizing = false;
