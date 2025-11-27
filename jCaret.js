@@ -1023,6 +1023,7 @@ class jCaret {
                     this.linkModal.querySelector('#linkUrl').focus();
                 }
             } else if (cmd === 'insertBlockquote') {
+                if(this.language === 'en' && document.querySelector('button[data-command="justifyRight"]').classList.contains('is-active')) return;
                 const sel = window.getSelection();
                 if (!sel.rangeCount) return;
                 const range = sel.getRangeAt(0);
@@ -1032,6 +1033,7 @@ class jCaret {
                 }
                 const blockquote = container.closest('blockquote');
                 if (blockquote) {
+                    
                     const fragment = document.createDocumentFragment();
                     while (blockquote.firstChild) {
                         fragment.appendChild(blockquote.firstChild);
@@ -1062,7 +1064,7 @@ class jCaret {
                     sel.removeAllRanges();
                     sel.addRange(newRange);
                 }
-                this.updateDirections();
+                if(this.language === 'ar') this.updateDirections();
                 this.updateToolbarState();
                 changed = true;
             } else if (cmd === 'insertUnorderedList' || cmd === 'insertOrderedList') {
