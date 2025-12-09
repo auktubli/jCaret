@@ -3,7 +3,7 @@
  * @description A lightweight, fully featured, and customizable rich-text editor.
  * The editor is designed to be responsive and supports both LTR and RTL languages.
  * All static CSS is externalized to the <head> of the document.
- * Made With Love By: Jaber Bin Ayyash His Son Hamzah.
+ * Made With Love By: www.auktubli.com.
  */
 class jCaret {
     /**
@@ -416,7 +416,7 @@ class jCaret {
                 insertColLeft: 'إدراج عمود يسار', insertColRight: 'إدراج عمود يمين',
                 deleteRow: 'حذف الصف', deleteCol: 'حذف العمود', deleteTable: 'حذف الجدول',
                 clearAll: 'مسح الكل', insertLink: 'أدخل الرابط', linkPlaceholder: 'https://example.com',
-                cancel: 'إلغاء', save: 'حفظ', rows: 'الصفوف:', cols: 'الأعمدة:', infoTitle:'حول', infoText:'إختصارات لوحة المفاتيح', by:'لـ : جابر بن عيّاش إبنه حمزة.',
+                cancel: 'إلغاء', save: 'حفظ', rows: 'الصفوف:', cols: 'الأعمدة:', infoTitle:'حول', infoText:'إختصارات لوحة المفاتيح', by:'www.auktubli.com',
                 clearAllConfirm: 'هل أنت متأكد من مسح كل المحتوى؟', maxColsAlert: 'الحد الأقصى 10 أعمدة', forQuote:'سطر إقتباس جديد', forEnlarge:'تكبير الخط على مستوى السطر', forShrink:'تصغير الخظ على مستوى السطر', forDelete:'حذف صورة أو جدول',
                 caption: 'تسمية توضيحية',
                 warning: 'تحذير',
@@ -451,7 +451,7 @@ class jCaret {
                 insertColLeft: 'Insert Column Left', insertColRight: 'Insert Column Right',
                 deleteRow: 'Delete Row', deleteCol: 'Delete Column', deleteTable: 'Delete Table',
                 clearAll: 'Clear All', insertLink: 'Enter Link', linkPlaceholder: 'https://example.com',
-                cancel: 'Cancel', save: 'Save', rows: 'Rows:', cols: 'Columns:', infoTitle:'About',infoText:'Keyboard Shortcuts', by:'For : Jaber bin Ayyash His Son Hamzah.',
+                cancel: 'Cancel', save: 'Save', rows: 'Rows:', cols: 'Columns:', infoTitle:'About',infoText:'Keyboard Shortcuts', by:'www.auktubli.com.',
                 clearAllConfirm: 'Are you sure you want to clear all content?', maxColsAlert: 'Maximum of 10 columns allowed', forQuote:'New quote line', forEnlarge:'Enlarge text font (line level)', forShrink:'Shrink text font (line level)', forDelete:'Remove image or table',
                 caption: 'Caption',
                 warning: 'Warning',
@@ -708,7 +708,7 @@ class jCaret {
                     </div>
                 </div>
                 <div class="flex justify-between gap-2 mt-6 pt-4 border-t border-gray-100">
-                    <p style="margin-top: 10px;">${this.i18n.by}</p><button id="closeInfo" class="px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">${this.i18n.ok || 'OK'}</button>
+                    <p style="margin-top: 10px;"><a href="https://www.auktubli.com" target="blank">${this.i18n.by}</a></p><button id="closeInfo" class="px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">${this.i18n.ok || 'OK'}</button>
                 </div>
             </div>
         `;
@@ -859,50 +859,105 @@ class jCaret {
             const oldContent = this.editor.innerHTML;
             const reader = new FileReader();
             reader.onload = ev => {
-                const figure = document.createElement('figure');
-                figure.className = 'resizable center';
-                figure.contentEditable = 'false';
-                figure.id = 'temp-new-image';
-                const img = document.createElement('img');
-                img.src = ev.target.result;
-                img.alt = 'Uploaded Image';
-                img.style.display = 'block';
-                img.style.width = '100%';
-                img.style.height = 'auto';
-                figure.appendChild(img);
-                const figcaption = document.createElement('figcaption');
-                figcaption.className = 'caption';
-                figcaption.contentEditable = 'true';
-                figcaption.textContent = this.i18n.caption; // Use translation
-                figure.appendChild(figcaption);
-                this.editor.focus();
-                this.restoreSelection();
-                document.execCommand('insertHTML', false, figure.outerHTML);
-                const newFigure = this.editor.querySelector('#temp-new-image');
-                document.querySelector('button[data-command="justifyFull"]').style.display = "none";
-                if (newFigure) {
-                    newFigure.removeAttribute('id');
-                    this.addResizeHandle(newFigure);
-                    this.selectedResizable = newFigure;
-                    const p = document.createElement('p');
-                    p.innerHTML = '<br>';
-                    newFigure.parentNode.insertBefore(p, newFigure.nextSibling);
-                    const sel = window.getSelection();
-                    const range = document.createRange();
-                    range.setStart(p, 0);
-                    range.collapse(true);
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                }
-                if (this.editor.innerHTML !== oldContent) {
-                    this.undoStack.push(oldContent);
-                    this.redoStack = [];
-                    this.lastContent = this.editor.innerHTML;
-                    this.saveAll();
-                }
-                this.updateToolbarState();
-                this.imageUpload.value = '';
+                const tempImg = new Image();
+                tempImg.src = ev.target.result;
+                tempImg.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    
+                    // 1. INCREASE MAX WIDTH
+                    // 800px is often too small for full-width desktop viewing. 
+                    // 1200px or 1600px is a better balance for quality vs. size.
+                    const maxWidth = 1200; 
+                    
+                    let width = tempImg.width;
+                    let height = tempImg.height;
+
+                    // Calculate new dimensions keeping aspect ratio
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+
+                    // 2. ENABLE SMOOTH SCALING
+                    // This ensures the browser uses high-quality algorithms when downscaling.
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+
+                    ctx.drawImage(tempImg, 0, 0, width, height);
+
+                    // 3. OPTIMIZE COMPRESSION FORMAT AND QUALITY
+                    // 'image/webp' usually offers better compression/quality ratio than jpeg.
+                    // Quality 0.75 (75%) removes metadata/bloat but keeps visual crispness.
+                    // If the browser doesn't support WebP, it silently falls back to PNG/JPEG.
+                    let compressedSrc = canvas.toDataURL('image/webp', 0.75);
+
+                    // Fallback: If WebP isn't supported or returns a larger string (rare), use JPEG at 0.7
+                    if (compressedSrc.length > ev.target.result.length && tempImg.src.startsWith('data:image/jpeg')) {
+                        compressedSrc = canvas.toDataURL('image/jpeg', 0.7);
+                    }
+
+                    // --- Rest of your logic remains the same ---
+                    const figure = document.createElement('figure');
+                    figure.className = 'resizable center';
+                    figure.contentEditable = 'false';
+                    figure.id = 'temp-new-image';
+
+                    const img = document.createElement('img');
+                    img.src = compressedSrc;
+                    img.alt = 'Uploaded Image';
+                    img.style.display = 'block';
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
+
+                    figure.appendChild(img);
+
+                    const figcaption = document.createElement('figcaption');
+                    figcaption.className = 'caption';
+                    figcaption.contentEditable = 'true';
+                    figcaption.textContent = this.i18n.caption; 
+                    
+                    figure.appendChild(figcaption);
+                    this.editor.focus();
+                    this.restoreSelection();
+                    document.execCommand('insertHTML', false, figure.outerHTML);
+
+                    const newFigure = this.editor.querySelector('#temp-new-image');
+                    document.querySelector('button[data-command="justifyFull"]').style.display = "none";
+                    
+                    if (newFigure) {
+                        newFigure.removeAttribute('id');
+                        this.addResizeHandle(newFigure);
+                        this.selectedResizable = newFigure;
+                        
+                        const p = document.createElement('p');
+                        p.innerHTML = '<br>';
+                        newFigure.parentNode.insertBefore(p, newFigure.nextSibling);
+                        
+                        const sel = window.getSelection();
+                        const range = document.createRange();
+                        range.setStart(p, 0);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+
+                    if (this.editor.innerHTML !== oldContent) {
+                        this.undoStack.push(oldContent);
+                        this.redoStack = [];
+                        this.lastContent = this.editor.innerHTML;
+                        this.saveAll();
+                    }
+                    
+                    this.updateToolbarState();
+                    this.imageUpload.value = '';
+                };
             };
+            
             reader.readAsDataURL(file);
         });
         this.fontNameContainer.addEventListener('mousedown', () => this.saveSelection());
