@@ -14,12 +14,13 @@
     	<script>
     		const myEditor = new jCaret('#editor-container', {
 		        // language is 'en' by default if not specified.
-		        //language: 'ar', // /*en*//*ar*/
-		        width: '800px', // Overrides max-width to 800px
+		        language: 'ar', // /*en*//*ar*/
+		        width: '880px', // Overrides max-width to 800px
 		        height: '400px', // Sets min-height to 400px
-		        heightMode: 'fixed', // Editor will grow with content for /*min*/ Or /*fixed*/ for auto overflow-y
+		        heightMode: 'min', // Editor will grow with content for /*min*/ Or /*fixed*/ for auto overflow-y
 		        useLocalStorage: true, // /*true*/ Or /*false*/ for saving editor contents on page reload
-		        borderRadius: '10px' // Sets Container border-radius px
+		        borderRadius: '10px' ,// Sets Container border-radius px
+				pageNumberInset: 3
 		    });
     	</script>
     
